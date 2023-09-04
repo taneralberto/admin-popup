@@ -48,15 +48,15 @@ if ( ! class_exists( 'Admin_Popup' ) ) {
 			define( 'ADMIN_POPUP_VERSION', '1.0.0' );
 		}
 
-		public function activate() {
+		public static function activate() {
 			update_option( 'rewrite_rules', '' );
 		}
 
-		public function deactivate() {
+		public static function deactivate() {
 			flush_rewrite_rules();
 		}
 
-		public function uninstall() {
+		public static function uninstall() {
 
 		}
 	}
