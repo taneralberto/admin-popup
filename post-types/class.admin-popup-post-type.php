@@ -3,21 +3,37 @@
 if ( ! class_exists( 'Admin_Popup_Post_Type' ) ) {
 	class Admin_Popup_Post_Type {
 
-		const CUSTOM_POST_TYPE = 'admin_popup';
-		const PRIORITY_META_BOX_ID = 'admin_popup_priority_meta_box';
-		const OPTIONS_META_BOX_ID = 'admin_popup_options_meta_box';
+		const CUSTOM_POST_TYPE_KEY = 'admin_popup';
+
+		/*const PRIORITY_META_BOX_ID = 'admin_popup_priority_meta_box';
+		const OPTIONS_META_BOX_ID = 'admin_popup_options_meta_box';*/
+
+		const META_BOXES_KEYS = array(
+			'priority' => 'admin_popup_priority',
+			'options' => 'admin_popup_options'
+		);
+
+		const META_KEYS = array(
+			'priority' => 'admin_popup_priority',
+			'style' => 'admin_popup_style',
+			'button_text' => 'admin_popup_button_text'
+		);
+
+		const PRIORITY_META_ID = 'admin_popup_priority';
+		const STYLE_META_ID = 'admin_popup_style';
+		const BUTTON_TEXT_META_ID = 'admin_popup_button_text';
 
 		function __construct() {
-
 			add_action( 'init', array( $this, 'create_post_type' ) );
 			add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ) );
 			add_action( 'save_post', array( $this, 'save_post' ) );
-
+			add_filter( 'manage_admin_popup_posts_columns', array( $this, 'register_columns' ) );
+			add_action( 'manage_admin_popup_posts_custom_column', array( $this, 'render_columns' ), 10, 2 );
 		}
 
 		public function create_post_type() {
 			register_post_type(
-				self::CUSTOM_POST_TYPE,
+				self::CUSTOM_POST_TYPE_KEY,
 				array(
 					'labels' => array(
 						'name' => esc_html__( 'Popups', 'admin-popup' ),
@@ -64,21 +80,20 @@ if ( ! class_exists( 'Admin_Popup_Post_Type' ) ) {
 		}
 
 		public function add_meta_boxes() {
-
 			add_meta_box(
-				self::PRIORITY_META_BOX_ID,
+				self::META_BOXES_KEYS['priority'],
 				esc_html__( 'Priority', 'admin-popup' ),
 				array( $this, 'priority_meta_box_view' ),
-				self::CUSTOM_POST_TYPE,
+				self::CUSTOM_POST_TYPE_KEY,
 				'normal',
 				'high',
 			);
 
 			add_meta_box(
-				self::OPTIONS_META_BOX_ID,
+				self::META_BOXES_KEYS['options'],
 				esc_html__( 'Options', 'admin-popup' ),
 				array( $this, 'options_meta_box_view' ),
-				self::CUSTOM_POST_TYPE,
+				self::CUSTOM_POST_TYPE_KEY,
 				'normal',
 				'high',
 			);
@@ -93,7 +108,6 @@ if ( ! class_exists( 'Admin_Popup_Post_Type' ) ) {
 		}
 
 		public function save_post( $post_id ) {
-
 			if ( isset( $_POST['admin_popup_priority_nonce'] ) ) {
 				if ( ! wp_verify_nonce( $_POST['admin_popup_priority_nonce'], 'admin_popup_priority_nonce' ) ) {
 					return;
@@ -110,7 +124,7 @@ if ( ! class_exists( 'Admin_Popup_Post_Type' ) ) {
 				return;
 			}
 
-			if ( ! isset( $_POST['post_type'] ) && $_POST['post_type'] !== 'admin_popup' ) {
+			if ( isset( $_POST['post_type'] ) && $_POST['post_type'] !== 'admin_popup' ) {
 				return;
 			}
 
@@ -122,35 +136,54 @@ if ( ! class_exists( 'Admin_Popup_Post_Type' ) ) {
 				return;
 			}
 
-			if ( ! isset( $_POST['action'] ) && $_POST['action'] !== 'editpost' ) {
-				return;
+			if ( isset( $_POST['action'] ) && $_POST['action'] === 'editpost' ) {
+				/**
+				 * Priority metadata validation
+				 */
+				$old_admin_popup_priority = get_post_meta( $post_id, self::META_BOXES_KEYS['priority'], true );
+				$new_admin_popup_priority = $_POST[self::META_BOXES_KEYS['priority']];
+
+				if ( ! empty( $new_admin_popup_priority ) ) {
+					update_post_meta( $post_id, self::META_BOXES_KEYS['priority'], sanitize_text_field( $new_admin_popup_priority ), $old_admin_popup_priority );
+				} else {
+					update_post_meta( $post_id, self::META_BOXES_KEYS['priority'], 'info' );
+				}
+
+				/**
+				 * Options: style and button_text validation
+				 */
+				$old_admin_popup_options = get_post_meta( $post_id, self::META_BOXES_KEYS['options'], true );
+				$new_admin_popup_options = $_POST[self::META_BOXES_KEYS['options']];
+
+				if ( ! isset( $new_admin_popup_options['style'] ) || empty( $new_admin_popup_options['style']) ) {
+					$new_admin_popup_options['style'] = 'style-1';
+				} elseif ( ! isset( $new_admin_popup_options['button_text'] ) || empty( $new_admin_popup_options['button_text'] ) ) {
+					$new_admin_popup_options['button_text'] = 'Ok';
+				}
+
+				update_post_meta( $post_id, self::META_BOXES_KEYS['options'], $new_admin_popup_options, $old_admin_popup_options );
 			}
+		}
 
-			/**
-			 * Priority metadata validation
-			 */
-			$old_admin_popup_priority = get_post_meta( $post_id, 'admin_popup_priority', true );
-			$new_admin_popup_priority = $_POST['admin_popup_priority'];
+		public function register_columns( $columns ) {
+			$columns[self::META_KEYS['priority']] = esc_html__( 'Priority', 'admin-popup' );
+			$columns[self::META_KEYS['style']] = esc_html__( 'Style', 'admin-popup' );
+			$columns[self::META_KEYS['button_text']] = esc_html__( 'Button Text', 'admin-popup' );
+			return $columns;
+		}
 
-			if ( ! empty( $new_admin_popup_priority ) ) {
-				update_post_meta( $post_id, 'admin_popup_priority', sanitize_text_field( $new_admin_popup_priority ), $old_admin_popup_priority );
-			} else {
-				update_post_meta( $post_id, 'admin_popup_priority', 'info' );
+		public function render_columns( $column, $post_id ) {
+			switch( $column ) {
+				case  'admin_popup_priority' :
+					echo get_post_meta( $post_id, self::META_KEYS['priority'], true);
+				break;
+				case 'admin_popup_style' :
+					echo get_post_meta( $post_id, self::META_KEYS['style'], true);
+				break;
+				case 'admin_popup_button_text' :
+					echo get_post_meta( $post_id, self::META_KEYS['button_text'], true);
+				break;
 			}
-
-			/**
-			 * Options: style and button_text validation
-			 */
-			$old_admin_popup_options = get_post_meta( $post_id, 'admin_popup_options', true );
-			$new_admin_popup_options = $_POST['admin_popup_options'];
-
-			if ( ! isset( $new_admin_popup_options['style'] ) || empty( $new_admin_popup_options['style']) ) {
-				$new_admin_popup_options['style'] = 'style-1';
-			} elseif ( ! isset( $new_admin_popup_options['button_text'] ) || empty( $new_admin_popup_options['button_text'] ) ) {
-				$new_admin_popup_options['button_text'] = 'Ok';
-			}
-
-			update_post_meta( $post_id, 'admin_popup_options', $new_admin_popup_options, $old_admin_popup_options );
 		}
 	}
 }
