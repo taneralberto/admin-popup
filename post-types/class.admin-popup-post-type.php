@@ -5,9 +5,6 @@ if ( ! class_exists( 'Admin_Popup_Post_Type' ) ) {
 
 		const CUSTOM_POST_TYPE_KEY = 'admin_popup';
 
-		/*const PRIORITY_META_BOX_ID = 'admin_popup_priority_meta_box';
-		const OPTIONS_META_BOX_ID = 'admin_popup_options_meta_box';*/
-
 		const META_BOXES_KEYS = array(
 			'priority' => 'admin_popup_priority',
 			'options' => 'admin_popup_options'
@@ -19,19 +16,18 @@ if ( ! class_exists( 'Admin_Popup_Post_Type' ) ) {
 			'button_text' => 'admin_popup_button_text'
 		);
 
-		const PRIORITY_META_ID = 'admin_popup_priority';
-		const STYLE_META_ID = 'admin_popup_style';
-		const BUTTON_TEXT_META_ID = 'admin_popup_button_text';
-
 		function __construct() {
+
 			add_action( 'init', array( $this, 'create_post_type' ) );
 			add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ) );
 			add_action( 'save_post', array( $this, 'save_post' ) );
 			add_filter( 'manage_admin_popup_posts_columns', array( $this, 'register_columns' ) );
 			add_action( 'manage_admin_popup_posts_custom_column', array( $this, 'render_columns' ), 10, 2 );
+			add_filter( 'manage_edit-admin_popup_sortable_columns', array( $this, 'sortable_columns' ) );
 		}
 
 		public function create_post_type() {
+
 			register_post_type(
 				self::CUSTOM_POST_TYPE_KEY,
 				array(
@@ -80,6 +76,7 @@ if ( ! class_exists( 'Admin_Popup_Post_Type' ) ) {
 		}
 
 		public function add_meta_boxes() {
+
 			add_meta_box(
 				self::META_BOXES_KEYS['priority'],
 				esc_html__( 'Priority', 'admin-popup' ),
@@ -100,14 +97,17 @@ if ( ! class_exists( 'Admin_Popup_Post_Type' ) ) {
 		}
 
 		public function priority_meta_box_view() {
+
 			require_once( ADMIN_POPUP_PATH . 'views/priority_meta_box.php' );
 		}
 
 		public function options_meta_box_view() {
+
 			require_once( ADMIN_POPUP_PATH . 'views/options_meta_box.php' );
 		}
 
 		public function save_post( $post_id ) {
+
 			if ( isset( $_POST['admin_popup_priority_nonce'] ) ) {
 				if ( ! wp_verify_nonce( $_POST['admin_popup_priority_nonce'], 'admin_popup_priority_nonce' ) ) {
 					return;
@@ -124,7 +124,7 @@ if ( ! class_exists( 'Admin_Popup_Post_Type' ) ) {
 				return;
 			}
 
-			if ( isset( $_POST['post_type'] ) && $_POST['post_type'] !== 'admin_popup' ) {
+			if ( isset( $_POST['post_type'] ) && $_POST['post_type'] !== self::CUSTOM_POST_TYPE_KEY ) {
 				return;
 			}
 
@@ -153,9 +153,9 @@ if ( ! class_exists( 'Admin_Popup_Post_Type' ) ) {
 				 * Options: style and button_text validation
 				 */
 				$old_admin_popup_options = get_post_meta( $post_id, self::META_BOXES_KEYS['options'], true );
-				$new_admin_popup_options = $_POST[self::META_BOXES_KEYS['options']];
+				$new_admin_popup_options = isset( $_POST[self::META_BOXES_KEYS['options']] ) ? $_POST[self::META_BOXES_KEYS['options']] : array();
 
-				if ( ! isset( $new_admin_popup_options['style'] ) || empty( $new_admin_popup_options['style']) ) {
+				if ( ! isset( $new_admin_popup_options['style'] ) || empty( $new_admin_popup_options['style'] ) ) {
 					$new_admin_popup_options['style'] = 'style-1';
 				} elseif ( ! isset( $new_admin_popup_options['button_text'] ) || empty( $new_admin_popup_options['button_text'] ) ) {
 					$new_admin_popup_options['button_text'] = 'Ok';
@@ -166,6 +166,7 @@ if ( ! class_exists( 'Admin_Popup_Post_Type' ) ) {
 		}
 
 		public function register_columns( $columns ) {
+
 			$columns[self::META_KEYS['priority']] = esc_html__( 'Priority', 'admin-popup' );
 			$columns[self::META_KEYS['style']] = esc_html__( 'Style', 'admin-popup' );
 			$columns[self::META_KEYS['button_text']] = esc_html__( 'Button Text', 'admin-popup' );
@@ -173,17 +174,30 @@ if ( ! class_exists( 'Admin_Popup_Post_Type' ) ) {
 		}
 
 		public function render_columns( $column, $post_id ) {
+
+			$options = get_post_meta( $post_id, self::META_BOXES_KEYS['options'], true );
+
 			switch( $column ) {
-				case  'admin_popup_priority' :
-					echo get_post_meta( $post_id, self::META_KEYS['priority'], true);
+				case  self::META_KEYS['priority'] :
+					echo esc_html( get_post_meta( $post_id, self::META_KEYS['priority'], true) );
 				break;
-				case 'admin_popup_style' :
-					echo get_post_meta( $post_id, self::META_KEYS['style'], true);
+				case self::META_KEYS['style'] :
+					echo esc_html( $options['style'] );
 				break;
-				case 'admin_popup_button_text' :
-					echo get_post_meta( $post_id, self::META_KEYS['button_text'], true);
+				case self::META_KEYS['button_text'] :
+					echo esc_html( $options['button_text'] );
+				break;
+				default :
+					echo '';
 				break;
 			}
+		}
+
+		public function sortable_columns( $columns ) {
+			$columns[self::META_KEYS['priority']] = self::META_KEYS['priority'];
+			$columns[self::META_KEYS['style']] = self::META_KEYS['style'];
+			$columns[self::META_KEYS['button_text']] = self::META_KEYS['button_text'];
+			return $columns;
 		}
 	}
 }

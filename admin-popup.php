@@ -38,14 +38,35 @@ if ( ! class_exists( 'Admin_Popup' ) ) {
 		function __construct() {
 			$this->define_constants();
 
+			add_action( 'admin_menu', array( $this, 'add_menu' ) );
+
 			require_once( ADMIN_POPUP_PATH . 'post-types/class.admin-popup-post-type.php' );
 			$admin_popup_post_type = new Admin_Popup_Post_Type();
+
+			require_once( ADMIN_POPUP_PATH . 'settings/class.admin-popup-settings.php' );
+			$admin_popup_settings = new Admin_Popup_Settings();
 		}
 
 		public function define_constants() {
 			define( 'ADMIN_POPUP_PATH', plugin_dir_path( __FILE__ ) );
 			define( 'ADMIN_POPUP_URL', plugin_dir_url( __FILE__ ) );
 			define( 'ADMIN_POPUP_VERSION', '1.0.0' );
+		}
+
+		public function add_menu() {
+
+			add_submenu_page(
+				'edit.php?post_type=admin_popup',
+				'Settings',
+				'Settings',
+				'manage_options',
+				'admin_popup_settings',
+				array( $this, 'settings_page' ),
+			);
+		}
+
+		public function settings_page() {
+			require_once( ADMIN_POPUP_PATH . 'views/settings-page.php' );
 		}
 
 		public static function activate() {
