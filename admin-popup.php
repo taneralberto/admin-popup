@@ -66,6 +66,15 @@ if ( ! class_exists( 'Admin_Popup' ) ) {
 		}
 
 		public function settings_page() {
+			if( ! current_user_can( 'manage_options' ) ) {
+				return;
+			}
+
+			if( isset( $_GET['settings-updated'] ) ) {
+				add_settings_error( 'admin_popup_options', 'admin_popup_setting_message', esc_html__( 'Settings Saved Successfully', 'admin-popup'), 'success' );
+			}
+
+			settings_errors( 'admin_popup_options', true );
 			require_once( ADMIN_POPUP_PATH . 'views/settings-page.php' );
 		}
 
