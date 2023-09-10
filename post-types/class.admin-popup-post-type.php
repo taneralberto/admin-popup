@@ -182,10 +182,12 @@ if ( ! class_exists( 'Admin_Popup_Post_Type' ) ) {
 					echo esc_html( get_post_meta( $post_id, self::META_KEYS['priority'], true) );
 				break;
 				case self::META_KEYS['style'] :
-					echo esc_html( $options['style'] );
+					$value = isset( $options['style'] ) ? $options['style'] : '';
+					echo esc_html( $value );
 				break;
 				case self::META_KEYS['button_text'] :
-					echo esc_html( $options['button_text'] );
+					$value = isset( $options['button_text'] ) ? $options['button_text'] : '';
+					echo esc_html( $value );
 				break;
 				default :
 					echo '';

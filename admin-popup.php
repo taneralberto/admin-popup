@@ -45,6 +45,8 @@ if ( ! class_exists( 'Admin_Popup' ) ) {
 
 			require_once( ADMIN_POPUP_PATH . 'settings/class.admin-popup-settings.php' );
 			$admin_popup_settings = new Admin_Popup_Settings();
+
+			require_once( ADMIN_POPUP_PATH . 'views/popup.php' );
 		}
 
 		public function define_constants() {

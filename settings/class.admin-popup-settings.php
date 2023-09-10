@@ -13,7 +13,7 @@ if ( ! class_exists( 'Admin_Popup_Settings' ) ) {
 
         public function admin_init() {
 
-            //register_setting( 'admin_popup_options', 'Admin Popup Options', array( $this, 'settings_when_registered' ) );
+            //register_setting( 'admin_popup_group', 'admin_popup_options', array( $this, 'settings_when_registered' ) );
 
 			register_setting(
                 'admin_popup_group',
@@ -22,9 +22,38 @@ if ( ! class_exists( 'Admin_Popup_Settings' ) ) {
                     'type' => 'array',
                     'description' => 'Array with all the options data',
                     'sanitize_callback' => array( $this, 'settings_when_registered' ),
-                    'show_in_rest' => true
                 )
             );
+
+            add_settings_section(
+                'admin_popup_general_section',
+                esc_html__( 'Gerenal Settings', 'admin-popup' ),
+                null,
+                'admin_popup_general_page'
+            );
+
+            add_settings_field(
+                'admin_popup_display',
+                esc_html__( 'What Popup show?','admin-popup' ),
+                array( $this, 'field_callback_what_popup_display' ),
+                'admin_popup_general_page',
+                'admin_popup_general_section',
+                array(
+                    'label_for' => 'popup_id'
+                )
+
+            );
+        }
+
+        public function field_callback_what_popup_display() {
+
+            $value = isset( self::$options['popup_id'] ) ? esc_html( self::$options['popup_id'] ) : '';
+
+            ?>
+            <input type="text" name="admin_popup_options[popup_id]" id="popup_id"
+            value="<?php echo $value; ?>"
+            />
+            <?php
         }
 
         public function settings_when_registered( $input ) {
@@ -32,7 +61,7 @@ if ( ! class_exists( 'Admin_Popup_Settings' ) ) {
             $new_input = array();
 
             foreach( $input as $key => $value ) {
-                if( empty($value) ) {
+                if( empty( $value ) ) {
                     add_settings_error( 'admin_popup_options', 'admin_popup_setting_message', esc_html__( 'There\'re fields that cannot be left empty.' ), 'error' );
                 }
 
@@ -41,13 +70,5 @@ if ( ! class_exists( 'Admin_Popup_Settings' ) ) {
 
             return $new_input;
         }
-
-		/*public static function getOptions() {
-			return self::$options;
-		}
-
-        public function setOptions( $value ) {
-           self::$options[] = $value;
-        }*/
 	}
 }
