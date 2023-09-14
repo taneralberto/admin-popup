@@ -7,19 +7,23 @@ if ( ! class_exists( 'Admin_Popup_Post_Type' ) ) {
 
 		const META_BOXES_KEYS = array(
 			'priority' => 'admin_popup_priority',
-			'options' => 'admin_popup_options'
+			'options' => 'admin_popup_options',
+			'background' => 'admin_popup_background'
 		);
 
 		const META_KEYS = array(
 			'priority' => 'admin_popup_priority',
 			'style' => 'admin_popup_style',
-			'button_text' => 'admin_popup_button_text'
+			'button_text' => 'admin_popup_button_text',
+			'background' => 'admin_popup_background'
 		);
 
 		function __construct() {
 
 			add_action( 'init', array( $this, 'create_post_type' ) );
 			add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ) );
+			// Using Meta Box Framework Plugin to create image meta
+			add_filter( 'rwmb_meta_boxes', array( $this, 'background_meta_box_view' ) );
 			add_action( 'save_post', array( $this, 'save_post' ) );
 			add_filter( 'manage_admin_popup_posts_columns', array( $this, 'register_columns' ) );
 			add_action( 'manage_admin_popup_posts_custom_column', array( $this, 'render_columns' ), 10, 2 );
@@ -104,6 +108,29 @@ if ( ! class_exists( 'Admin_Popup_Post_Type' ) ) {
 		public function options_meta_box_view() {
 
 			require_once( ADMIN_POPUP_PATH . 'views/options_meta_box.php' );
+		}
+
+		public function background_meta_box_view( $meta_boxes ) {
+
+			$prefix = '';
+
+			// Data structure based in Meta Box Framework Plugin
+			$meta_boxes[] = [
+				'title'   => esc_html__( 'Background', 'admin-popup' ),
+				'id'      => 'admin_popup_background_group',
+				'post_types' => 'admin_popup',
+				'context' => 'normal',
+				'fields'  => [
+					[
+						'type' => 'image_advanced',
+						'name' => esc_html__( 'Choose a image', 'admin-popup' ),
+						'id'   => $prefix . 'admin_popup_background',
+						'max_file_uploads' => 1,
+					],
+				],
+			];
+
+			return $meta_boxes;
 		}
 
 		public function save_post( $post_id ) {

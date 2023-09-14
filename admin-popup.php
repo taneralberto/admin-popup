@@ -36,6 +36,7 @@ if ( ! class_exists( 'Admin_Popup' ) ) {
 	class Admin_Popup {
 
 		function __construct() {
+
 			$this->define_constants();
 
 			add_action( 'admin_menu', array( $this, 'add_menu' ) );
@@ -46,10 +47,15 @@ if ( ! class_exists( 'Admin_Popup' ) ) {
 			require_once( ADMIN_POPUP_PATH . 'settings/class.admin-popup-settings.php' );
 			$admin_popup_settings = new Admin_Popup_Settings();
 
-			require_once( ADMIN_POPUP_PATH . 'views/popup.php' );
+			wp_reset_postdata();
+
+			if( isset( Admin_Popup_Settings::$options['popup_display'] ) && checked( '1', Admin_Popup_Settings::$options['popup_display'] ) ) {
+				$this->display_popup();
+			}
 		}
 
 		public function define_constants() {
+
 			define( 'ADMIN_POPUP_PATH', plugin_dir_path( __FILE__ ) );
 			define( 'ADMIN_POPUP_URL', plugin_dir_url( __FILE__ ) );
 			define( 'ADMIN_POPUP_VERSION', '1.0.0' );
@@ -68,6 +74,7 @@ if ( ! class_exists( 'Admin_Popup' ) ) {
 		}
 
 		public function settings_page() {
+
 			if( ! current_user_can( 'manage_options' ) ) {
 				return;
 			}
@@ -78,6 +85,35 @@ if ( ! class_exists( 'Admin_Popup' ) ) {
 
 			settings_errors( 'admin_popup_options', true );
 			require_once( ADMIN_POPUP_PATH . 'views/settings-page.php' );
+		}
+
+		public function display_popup() {
+
+			if( ! is_admin() ) {
+				return;
+			}
+
+			global $pagenow;
+
+			if( $pagenow === 'post-new.php' ) {
+				return;
+			} elseif( $pagenow === 'post.php' ) {
+				return;
+			}
+
+			if ( ! isset( Admin_Popup_Settings::$options['popup_id'] ) && empty( Admin_Popup_Settings::$options['popup_id'] ) ) {
+				return;
+			}
+
+			$popup_id = Admin_Popup_Settings::$options['popup_id'];
+
+			if( null === get_post( $popup_id ) && Admin_Popup_Post_Type::CUSTOM_POST_TYPE_KEY !== get_post_type( $popup_id ) ) {
+				return;
+			}
+
+			$options = get_post_meta( $popup_id, 'admin_popup_options', true );
+
+			require_once( ADMIN_POPUP_PATH . 'views/popup.php' );
 		}
 
 		public static function activate() {

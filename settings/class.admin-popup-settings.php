@@ -41,7 +41,17 @@ if ( ! class_exists( 'Admin_Popup_Settings' ) ) {
                 array(
                     'label_for' => 'popup_id'
                 )
+            );
 
+            add_settings_field(
+                'admin_popup_show',
+                esc_html__( 'Show Popup?', 'admin-popup' ),
+                array( $this, 'field_callback_display_popup' ),
+                'admin_popup_general_page',
+                'admin_popup_general_section',
+                array(
+                    'label_for' => 'popup_display'
+                )
             );
         }
 
@@ -52,6 +62,19 @@ if ( ! class_exists( 'Admin_Popup_Settings' ) ) {
             ?>
             <input type="text" name="admin_popup_options[popup_id]" id="popup_id"
             value="<?php echo $value; ?>"
+            />
+            <?php
+        }
+
+        public function field_callback_display_popup() {
+            ?>
+            <input type="checkbox"
+            name="admin_popup_options[popup_display]"
+            id="popup_display"
+            value="1"
+            <?php if( isset( self::$options['popup_display'] ) ) {
+                checked( '1', self::$options['popup_display'], true );
+            } ?>
             />
             <?php
         }
