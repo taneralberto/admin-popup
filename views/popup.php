@@ -18,8 +18,6 @@ $popup_background = wp_get_attachment_image_src( get_post_meta( $popup_id, 'admi
                 ?>
             </div>
 
-            <?php //thumbnail_by_id(); ?>
-
             <button class="admin_popup_button">
                 <?php
                 echo esc_html( $options['button_text'] );
@@ -28,9 +26,11 @@ $popup_background = wp_get_attachment_image_src( get_post_meta( $popup_id, 'admi
 
         </section>
 
+        <?php if( has_post_thumbnail( $popup_id )) : ?>
         <section class="admin_popup_image">
             <img src="<?php echo get_the_post_thumbnail_url( $popup_id, 'full' ); ?>" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="" decoding="async" loading="lazy">
         </section>
+        <?php endif; ?>
     </div>
 </div>
 
@@ -62,6 +62,7 @@ $popup_background = wp_get_attachment_image_src( get_post_meta( $popup_id, 'admi
     position: relative;
     background: #f0f0f1;
     display: grid;
+    align-items: center;
     gap: 2rem;
     padding: 4rem;
     max-width: 1080px;
@@ -121,12 +122,16 @@ $popup_background = wp_get_attachment_image_src( get_post_meta( $popup_id, 'admi
     display: flex;
     align-items: center;
     grid-column: 2;
+    width: 400px;
+    height: 400px;
 }
 
 .admin_popup_image img {
     max-width: 100%;
-    height: auto;
+    height: 100%;
     border-radius: 50%;
+    object-fit: cover;
+    border-radius: 100%;
 }
 </style>
 

@@ -49,7 +49,7 @@ if ( ! class_exists( 'Admin_Popup' ) ) {
 
 			wp_reset_postdata();
 
-			if( isset( Admin_Popup_Settings::$options['popup_display'] ) && checked( '1', Admin_Popup_Settings::$options['popup_display'] ) ) {
+			if( $this->validate_display_popup() ) {
 				$this->display_popup();
 			}
 		}
@@ -87,30 +87,48 @@ if ( ! class_exists( 'Admin_Popup' ) ) {
 			require_once( ADMIN_POPUP_PATH . 'views/settings-page.php' );
 		}
 
-		public function display_popup() {
+		public function validate_display_popup() {
+
+			if ( ! file_exists( ADMIN_POPUP_PATH . 'views/popup.php' ) ) {
+				return false;
+			}
+
+			if( isset( Admin_Popup_Settings::$options['popup_display'] ) && Admin_Popup_Settings::$options['popup_display'] === null ) {
+				return false;
+			}
 
 			if( ! is_admin() ) {
-				return;
+				return false;
+			}
+
+			if ( ( isset( $_POST['action'] ) && $_POST['action'] !== 'editpost' ) ) {
+				return false;
 			}
 
 			global $pagenow;
 
 			if( $pagenow === 'post-new.php' ) {
-				return;
+				return false;
 			} elseif( $pagenow === 'post.php' ) {
-				return;
+				return false;
 			}
 
 			if ( ! isset( Admin_Popup_Settings::$options['popup_id'] ) && empty( Admin_Popup_Settings::$options['popup_id'] ) ) {
-				return;
+				return false;
 			}
 
 			$popup_id = Admin_Popup_Settings::$options['popup_id'];
 
 			if( null === get_post( $popup_id ) && Admin_Popup_Post_Type::CUSTOM_POST_TYPE_KEY !== get_post_type( $popup_id ) ) {
-				return;
+				return false;
 			}
 
+			return true;
+		}
+
+		public function display_popup() {
+
+			$popup_id = Admin_Popup_Settings::$options['popup_id'];
 			$options = get_post_meta( $popup_id, 'admin_popup_options', true );
 
 			require_once( ADMIN_POPUP_PATH . 'views/popup.php' );
