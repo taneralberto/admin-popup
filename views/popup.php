@@ -1,7 +1,8 @@
 <?php
 $popup_background = wp_get_attachment_image_src( get_post_meta( $popup_id, 'admin_popup_background', true ), 'full' );
+$priority = get_post_meta( $popup_id, 'admin_popup_priority', true );
 ?>
-<div class="admin_popup" style="">
+<div class="admin_popup <?php echo esc_attr( $priority ); ?>">
     <div class="admin_popup_overlay"></div>
     <div class="admin_popup_wrap">
         <div class="admin_popup_background"></div>
@@ -69,11 +70,25 @@ $popup_background = wp_get_attachment_image_src( get_post_meta( $popup_id, 'admi
     min-height: 650px;
 }
 
+.admin_popup.danger .admin_popup_wrap {
+    border: 5px solid hsl(0, 60%, 50%);
+}
+.admin_popup.warning .admin_popup_wrap {
+    border: 5px solid hsl(60, 90%, 50%);
+}
+.admin_popup.info .admin_popup_wrap {
+    border: 5px solid hsl(200, 80%, 60%);
+}
+.admin_popup.success .admin_popup_wrap {
+    border: 5px solid hsl(100, 60%, 60%);
+}
+
+
 .admin_popup_background {
     position: absolute;
     z-index: -1;
     background: #1d2327;
-    background-image: url( <?php echo $popup_background[0]; ?> );
+    background-image: url( <?php echo esc_html( $popup_background[0] ); ?> );
     background-repeat: no-repeat;
     background-size: cover;
     top: 0;

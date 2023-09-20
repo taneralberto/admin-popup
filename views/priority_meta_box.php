@@ -15,7 +15,7 @@ $priority_meta = get_post_meta( $post->ID, 'admin_popup_priority', true );
             >
                 <option value="info" <?php isset( $priority_meta ) ? selected( $priority_meta, 'info' ) : ''; ?>><?php echo esc_html__( 'Info' ); ?></option>
                 <option value="warning" <?php isset( $priority_meta ) ? selected( $priority_meta, 'warning' ) : ''; ?>><?php echo esc_html__( 'Warning' ); ?></option>
-                <option value="error" <?php isset( $priority_meta ) ? selected( $priority_meta, 'error' ) : ''; ?>><?php echo esc_html__( 'Error' ); ?></option>
+                <option value="danger" <?php isset( $priority_meta ) ? selected( $priority_meta, 'danger' ) : ''; ?>><?php echo esc_html__( 'Danger' ); ?></option>
                 <option value="success" <?php isset( $priority_meta ) ? selected( $priority_meta, 'success' ) : ''; ?>><?php echo esc_html__( 'Success' ); ?></option>
             </select>
         </td>

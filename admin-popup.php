@@ -93,11 +93,11 @@ if ( ! class_exists( 'Admin_Popup' ) ) {
 				return false;
 			}
 
-			if( isset( Admin_Popup_Settings::$options['popup_display'] ) && Admin_Popup_Settings::$options['popup_display'] === null ) {
+			if( ! is_admin() ) {
 				return false;
 			}
 
-			if( ! is_admin() ) {
+			if( ! isset( Admin_Popup_Settings::$options['popup_display'] ) ) {
 				return false;
 			}
 

@@ -6,17 +6,18 @@
     ?>
 
     <h2 class="nav-tab-wrapper">
-        <a href="?page=admin_popup_settings&tab=general_options" class="nav-tab <?php echo $active_tab === 'general_options' ? 'nav-tab-active' : ''; ?>"><?php echo esc_html__( 'General Options' ); ?></a>
+        <a href="?post_type=admin_popup&page=admin_popup_settings&tab=general_options" class="nav-tab <?php echo $active_tab === 'general_options' ? 'nav-tab-active' : ''; ?>"><?php echo esc_html__( 'General Options' ); ?></a>
+        <a href="?post_type=admin_popup&page=admin_popup_settings&tab=users_options" class="nav-tab <?php echo $active_tab === 'users_options' ? 'nav-tab-active' : ''; ?>"><?php echo esc_html__( 'Users Options' ); ?></a>
     </h2>
 
     <form action="options.php" method="POST">
         <?php
-        if( $active_tab == 'general_options' ) {
+        if( $active_tab === 'general_options' ) {
             settings_fields( 'admin_popup_group' );
             do_settings_sections( 'admin_popup_general_page' );
-        } else {
+        } elseif ( $active_tab === 'users_options' ) {
             settings_fields( 'admin_popup_group' );
-            do_settings_sections( 'admin_popup_priority' );
+            do_settings_sections( 'admin_popup_users_page' );
         }
 
         submit_button( esc_html__( 'Save Settings', 'admin-popup' ) );
