@@ -106,7 +106,7 @@ if ( ! class_exists( 'Admin_Popup_Settings' ) ) {
 
             foreach( $users as $user ) { ?>
                 <label for="<?php echo esc_attr( $user->user_login ); ?>"><?php echo esc_html( $user->display_name ); ?></label>
-                <input type="checkbox" name="admin_popup_options[users]" value="<?php echo esc_html( $user->user_login ); ?>" id="<?php echo esc_attr( $user->user_login ); ?>">
+                <input type="checkbox" name="admin_popup_options[users][]" value="<?php echo esc_attr( $user->user_login ); ?>" id="<?php echo esc_attr( $user->user_login ); ?>">
                 <br>
             <?php $i++; } ?>
             </fieldset>
@@ -115,8 +115,6 @@ if ( ! class_exists( 'Admin_Popup_Settings' ) ) {
 
         public function settings_when_registered( $input ) {
 
-            var_dump( $input );
-
             $new_input = array();
 
             foreach( $input as $key => $value ) {
@@ -124,19 +122,41 @@ if ( ! class_exists( 'Admin_Popup_Settings' ) ) {
                     add_settings_error( 'admin_popup_options', 'admin_popup_setting_message', esc_html__( 'There\'re fields that cannot be left empty.' ), 'error' );
                 }
 
+                var_dump( $value );
+
                 $new_input[$key] = sanitize_text_field( $value );
             }
 
-            if( isset( $input['users'] ) ) {
+            echo "new_input:: ";
+            var_dump( $new_input );
 
-                foreach( $input['users'] as $key => $value ) {
+            //if( isset( $input['users'] ) ) {
+
+                $users = $input['users'];
+                //var_dump( $users );
+                //var_dump( $input['users'] );
+                $new_users = array();
+
+                foreach( $users as $key => $value ) {
                     //array_push( $new_input['users'], sanitize_text_field( $value ) );
 
-                    $new_input['users'][$key] = sanitize_text_field( $value );
-                }
-            }
+                    //var_dump(sanitize_text_field( $value ));
 
-            return $new_input;
+                    //$new_input['users'][$key] = sanitize_text_field( $value );
+
+                    $new_users[$key] = $value;
+
+                }
+
+                $new_input['users'] = $new_users;
+
+                //var_dump($new_input);
+
+
+                var_dump( $new_input );
+            //}
+
+            return $input;
         }
 	}
 }
